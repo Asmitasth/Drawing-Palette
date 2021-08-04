@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawing Palette</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <input type="file" id="image-input" />
+        <div class="toolbar">
+            <a class="selected" href="#" id="open" onclick="OpenImage()"><img src="icon/open.png" alt="Open Image"></a>
+            <a href="#" id="save" onclick="SaveImage()"><img src="icon/save.png" alt="Save Image"></a>
+            <a href="#" id="brush" onclick="ChangeTool('brush')"><img src="icon/brush.png" alt="Brush icon"></a>
+            <a href="#" id="line" onclick="ChangeTool('line')"><img src="icon/line.png" alt="Line icon"></a>
+            <a href="#" id="rectangle" onclick="ChangeTool('rectangle')"><img src="icon/rectangle.png" alt="rectangle icon"></a>
+            <a href="#" id="circle" onclick="ChangeTool('circle')"><img src="icon/circle.png" alt="circle icon"></a>
+            <a href="#" id="ellipse" onclick="ChangeTool('ellipse')"><img src="icon/ellipse.png" alt="ellipse icon"></a>
+            <a href="#" id="polygon" onclick="ChangeTool('polygon')"><img src="icon/polygon.png" alt="polygon icon"></a>
+            <a href="#" id="eraser" onclick="ChangeTool('eraser')"><img src="icon/eraser.jpg" alt="eraser icon"></a>
+            <input type="color" id="favcolor" name="favcolor" value="#ff0000">
+
+        </div><br>
+        <canvas id="my-canvas" width="600" height="600"></canvas>
+        <div id="img-data-div">
+            <a href="#" id="img-download" download="image.jpeg"> Download Image </a>
+        </div>
+
+    </div>
+    <script type="text/javascript" src="script.js"></script>
+
+</body>
+
+</html>
