@@ -1,9 +1,4 @@
-// JavaScript Paint App JavaScript Canvas API
-
-// Reference to the canvas element
 let canvas;
-// Context provides functions used for drawing and 
-// working with Canvas
 let ctx;
 // Stores previously drawn image data to restore after
 // new drawings are added
@@ -12,12 +7,25 @@ let savedImageData;
 let dragging = false;
 let strokeColor = 'black';
 let fillColor = 'black';
-let line_Width = 2;
+
+
+let eraser_Width = 5;
+
+let x;
+
+function askWidth() {
+    x = prompt('Enter the brush size');
+    return;
+}
+
+let line_Width = x;
+
 let polygonSides = 6;
 // Tool currently using
 let currentTool = 'brush';
 let canvasWidth = 600;
 let canvasHeight = 600;
+
 
 // Stores whether I'm currently using brush
 let usingBrush = false;
@@ -57,8 +65,7 @@ class Location {
 // Holds x & y polygon point values
 class PolygonPoint {
     constructor(x, y) {
-        this.x = x,
-            this.y = y;
+        (this.x = x), (this.y = y);
     }
 }
 // Stores top left x & y and size of rubber band box 
@@ -69,7 +76,7 @@ let mousedown = new MouseDownPos(0, 0);
 let loc = new Location(0, 0);
 
 // Call for our function to execute when page is loaded
-document.addEventListener('DOMContentLoaded', setupCanvas);
+document.addEventListener("DOMContentLoaded", setupCanvas);
 
 function setupCanvas() {
     // Get reference to canvas element
@@ -78,6 +85,7 @@ function setupCanvas() {
     ctx = canvas.getContext('2d');
     ctx.strokeStyle = strokeColor;
     ctx.lineWidth = line_Width;
+    ctx.eraser_Width = eraser_Width;
     // Execute ReactToMouseDown when the mouse is clicked
     canvas.addEventListener("mousedown", ReactToMouseDown);
     // Execute ReactToMouseMove when the mouse is clicked
@@ -87,14 +95,19 @@ function setupCanvas() {
 }
 
 function ChangeTool(toolClicked) {
-    document.getElementById("open").className = "";
-    document.getElementById("save").className = "";
-    document.getElementById("brush").className = "";
-    document.getElementById("line").className = "";
-    document.getElementById("rectangle").className = "";
-    document.getElementById("circle").className = "";
-    document.getElementById("ellipse").className = "";
-    document.getElementById("polygon").className = "";
+    console.log(document.querySelector(".toolbar"));
+    document.querySelector(".toolbar").childNodes.forEach((tool) => {
+        console.log(tool);
+        tool.className = "";
+    });
+    // document.getElementById("open").className = "";
+    // document.getElementById("save").className = "";
+    // document.getElementById("brush").className = "";
+    // document.getElementById("line").className = "";
+    // document.getElementById("rectangle").className = "";
+    // document.getElementById("circle").className = "";
+    // document.getElementById("ellipse").className = "";
+    // document.getElementById("polygon").className = "";
     // Highlight the last selected tool on toolbar
     document.getElementById(toolClicked).className = "selected";
     // Change current tool used for drawing
@@ -195,7 +208,8 @@ function getPolygonPoints() {
     // to find the X = mouseLoc.x + radiusX * Sin(angle)
     // You find the Y = mouseLoc.y + radiusY * Cos(angle)
     for (let i = 0; i < polygonSides; i++) {
-        polygonPoints.push(new PolygonPoint(loc.x + radiusX * Math.sin(angle),
+        polygonPoints.push(new PolygonPoint(
+            loc.x + radiusX * Math.sin(angle),
             loc.y - radiusY * Math.cos(angle)));
 
         // 2 * PI equals 360 degrees
@@ -274,9 +288,8 @@ function AddBrushPoint(x, y, mouseDown) {
 
 // Cycle through all brush points and connect them with lines
 function DrawBrush() {
+    ctx.beginPath();
     for (let i = 1; i < brushXPoints.length; i++) {
-        ctx.beginPath();
-
         // Check if the mouse button was down at this point
         // and if so continue drawing
         if (brushDownPos[i]) {
@@ -285,12 +298,14 @@ function DrawBrush() {
             ctx.moveTo(brushXPoints[i] - 1, brushYPoints[i]);
         }
         ctx.lineTo(brushXPoints[i], brushYPoints[i]);
-        ctx.closePath();
         ctx.stroke();
     }
+    ctx.closePath();
 }
 
 function ReactToMouseDown(e) {
+    const selectedColor = document.querySelector("#favcolor").value;
+    strokeColor = selectedColor;
     // Change the mouse pointer to a crosshair
     canvas.style.cursor = "crosshair";
     // Store location 
@@ -330,8 +345,11 @@ function ReactToMouseMove(e) {
     }
 };
 
+
+
 function ReactToMouseUp(e) {
     canvas.style.cursor = "default";
+    ctx.closePath();
     loc = GetMousePosition(e.clientX, e.clientY);
     RedrawCanvasImage();
     UpdateRubberbandOnMove(loc);
@@ -346,78 +364,43 @@ document.addEventListener('keydown', function(event) {
 });
 
 
-if (SaveImage() && window.homepagecheck()) {
-    // Add code
-}
+// if (SaveImage() && window.homepagecheck()) {
+//     // Add code
+// }
 
 // Saves the image in your default download directory
 function SaveImage() {
     // Get a reference to the link element 
-    var imageFile = document.getElementById("img-download");
-    // Set that you want to download the image when link is clicked
-    imageFile.setAttribute('download', 'image.png');
+    // var imageFile = document.getElementById("img-download");
+    // imageFile.setAttribute('download', 'image.png');
     // Reference the image in canvas for download
     // imageFile.setAttribute('href', canvas.toDataURL());
+    var link = document.createElement("a");
+    link.setAttribute("download", "image.png");
+    link.setAttribute("href", imageDataUrl);
+    link.click();
 }
 
 function OpenImage() {
     let img = new Image();
-    // Once the image is loaded clear the canvas and draw it
-    img.onload = function() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-    }
-    img.src = 'image.png';
 
+    const fileInputEl = document.createElement("input");
+    fileInputEl.setAttribute("type", "file");
+    fileInputEl.setAttribute("accept", "image/*");
+    fileInputEl.addEventListener("change", function(e) {
+        let file = fileInputEl.files[0];
+
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+            img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+        };
+        reader.readAsDataURL(file);
+    });
+    fileInputEl.click();
 }
 
 inputimage = document.getElementById("image-input");
-
-// inputimage.onchange = function(e) {
-// console.log(inputimage.value)
-// }
-
-inputimage.addEventListener('change', function() { console.log(inputimage.value) });
-
-// var canvas = document.getElementById('canvas');
-// var ctx = canvas.getContext('2d');
-// var img = new Image();
-// img.src = url;
-// img.onload = function() {
-//     var width = Math.min(500, img.width);
-//     var height = img.height * (width / img.width);
-
-//     canvas.width = width;
-//     canvas.height = height;
-//     ctx.drawImage(img, 0, 0, width, height);
-// };
-
-// var isPress = false;
-// var old = null;
-// canvas.addEventListener('mousedown', function(e) {
-//     isPress = true;
-//     old = { x: e.offsetX, y: e.offsetY };
-// });
-// canvas.addEventListener('mousemove', function(e) {
-//     if (isPress) {
-//         var x = e.offsetX;
-//         var y = e.offsetY;
-//         ctx.globalCompositeOperation = 'destination-out';
-
-//         ctx.beginPath();
-//         ctx.arc(x, y, 10, 0, 2 * Math.PI);
-//         ctx.fill();
-
-//         ctx.lineWidth = 20;
-//         ctx.beginPath();
-//         ctx.moveTo(old.x, old.y);
-//         ctx.lineTo(x, y);
-//         ctx.stroke();
-
-//         old = { x: x, y: y };
-
-//     }
-// });
-// canvas.addEventListener('mouseup', function(e) {
-//     isPress = false;
-// });
